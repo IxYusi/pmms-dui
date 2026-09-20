@@ -5,6 +5,18 @@ var isRDR = true;
 var audioVisualizations = {};
 var currentServerEndpoint = '127.0.0.1:30120';
 
+// Force referrer policy on any YouTube iframe MediaElement injects,
+// to prevent "Video unavailable" errors on licensed/label content.
+new MutationObserver(mutations => {
+	for (const mutation of mutations) {
+		for (const node of mutation.addedNodes) {
+			if (node.tagName === 'IFRAME' && node.src && node.src.includes('youtube')) {
+				node.referrerPolicy = 'strict-origin-when-cross-origin';
+			}
+		}
+	}
+}).observe(document.documentElement, {childList: true, subtree: true});
+
 function sendMessage(name, params) {
 	return fetch(`https://${resourceName}/${name}`, {
 		method: 'POST',
